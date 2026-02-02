@@ -1,0 +1,23 @@
+.carIntroAnimation{
+    animation: carIntro 2s infinite linear alternate;
+}
+
+.carIntroAnimation::-webkit-scrollbar{
+    display: none;
+}
+
+@keyframes carIntro {
+    0%{
+        left: 10%;
+        opacity: 0;
+    }
+
+    50%{
+        opacity: 0.2;
+    }
+
+    100%{
+        left: 50%;
+        opacity: 0;
+    }
+}

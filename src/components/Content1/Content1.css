@@ -1,0 +1,7 @@
+.searchBar-input{
+    box-shadow:  0 0 5px whitesmoke;
+}
+
+.searchBarAnimation{
+    animation: barAnimation 1.2s ease-in-out alternate-reverse infinite;
+}
