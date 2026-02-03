@@ -1,0 +1,18 @@
+.power{
+    background-color: rgba(255, 60, 0, 0.992);
+    box-shadow: 0 0 5px rgba(255, 60, 0, 0.992);
+}
+
+.speed{
+    background-color: rgba(13, 255, 0, 0.992);
+    box-shadow: 0 0 5px rgba(13, 255, 0, 0.992);
+}
+
+.max-speed{
+    background-color: rgba(0, 26, 255, 0.992);
+    box-shadow: 0 0 5px rgba(0, 26, 255, 0.992);
+}
+
+.buy-button:hover{
+    background-color: rgba(240, 248, 255, 0);
+}

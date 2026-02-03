@@ -6,7 +6,7 @@ const Content1 = () => {
       <div className="top-heading">
         <h1 className='text-yellow-400 text-xl font-bold tracking-widest uppercase'>experience excellence</h1>
       </div>
-      <div className="pageInfo mt-22">
+      <div className="pageInfo mt-20">
           <h1 className='text-white text-5xl font-extrabold tracking-widest'>LUXURY MEETS</h1>
           <div className="yellowBox w-[700px] bg-yellow-600 h-[70px] mt-2"></div>
           <p className='text-white mt-2'>Discover the World's top most automobiles,Where Engineering Meets Unparalleled Elegance</p>

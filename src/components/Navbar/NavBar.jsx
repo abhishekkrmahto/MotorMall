@@ -1,8 +1,10 @@
 import React from 'react'
 import logoImg from '../../assets/logo.png'
+import '../Navbar/Navbar.css'
+
 const NavBar = () => {
   return (
-    <nav className='w-screen h-[60px] bg-zinc-800 text-white flex justify-around items-center p-[20px]'>
+    <nav className='w-screen h-[60px] backgoundOfNav text-white flex justify-around items-center p-[20px'>
         <div className="leftNav cursor-pointer">
             ☰
         </div>
