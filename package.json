@@ -12,6 +12,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "aos": "^2.3.4",
+    "axios": "^1.13.4",
+    "cors": "^2.8.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.13.0",

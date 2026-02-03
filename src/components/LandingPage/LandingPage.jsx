@@ -6,6 +6,7 @@ import '../LandingPage/LandingPage.css'
 import { useEffect, useEffectEvent, useState } from "react"
 import Content1 from "../Content1/Content1"
 import Content2 from "../Content2/Content2"
+import Footer from "../Footer/Footer"
 
 const LandingPage = () => {
   const [animationSetter, setAnimationSetter] = useState("");
@@ -40,6 +41,7 @@ useEffect(() => {
       </div>
       <Content1/>
       <Content2/>
+      <Footer/>
     </div>
   )
 }
