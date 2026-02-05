@@ -3,7 +3,7 @@ import logoNoBg from '../../assets/logo-no-bg.png'
 import '../Content1/Content1.css'
 
 import '../LandingPage/LandingPage.css'
-import { useEffect, useEffectEvent, useState } from "react"
+import { useEffect, useState } from "react"
 import Content1 from "../Content1/Content1"
 import Content2 from "../Content2/Content2"
 import Footer from "../Footer/Footer"

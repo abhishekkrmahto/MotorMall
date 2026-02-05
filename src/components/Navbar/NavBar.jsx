@@ -12,7 +12,7 @@ const NavBar = () => {
            <span className="logo-img w-[50px] p-1 rounded-2xl cursor-pointer bg-orange-500"><img className='max-h-[40px] rounded-2xl justify-self-center' src={logoImg} alt="" /></span> Motor Mall
         </div>
         <div className="profileNav  flex items-center gap-3">
-            <span className="profile-icon bg-white rounded-2xl cursor-pointer">👤</span><span className="cartLogo cursor-pointer">🛒</span>
+            <span className="profile-icon bg-white rounded-2xl cursor-pointer">👤</span>
         </div>
     </nav>
   )

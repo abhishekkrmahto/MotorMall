@@ -1,0 +1,26 @@
+.formNotFilledNotification{
+    background-color: rgba(255, 0, 0, 0.608);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.phoneAndPinNotValidNotification{
+    background-color: rgba(255, 251, 0, 0.589);
+    padding: 10px;
+    border-radius: 10px;
+}
+.successNotification{
+    background-color: rgba(9, 255, 0, 0.589);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.animationNotification{
+    animation: notification 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes notification {
+    0%{
+        top: -10px;
+    }
+}
