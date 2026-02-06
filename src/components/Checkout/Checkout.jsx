@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "../Checkout/Checkout.css";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +15,12 @@ const Checkout = () => {
     setPhoneNumberAndPinValidNotification,
   ] = useState(false);
   const [successNotification, setSuccessNotification] = useState(false);
+  const [showOtpPopUp, setShowOtpPopUp] = useState(false);
+  const [invalidOtpNotification, setInvalidOtpNotification] = useState(false);
+  const [otp1, setOtp1] = useState("");
+  const [otp2, setOtp2] = useState("");
+  const [otp3, setOtp3] = useState("");
+  const [otp4, setOtp4] = useState("");
 
   const navigate = useNavigate();
 
@@ -28,6 +34,9 @@ const Checkout = () => {
       pinCode === ""
     ) {
       setInputIsEmptyNotification(true);
+      setTimeout(() => {
+        setInputIsEmptyNotification(false);
+      }, 2000);
       return;
     } else {
       setInputIsEmptyNotification(false);
@@ -35,6 +44,19 @@ const Checkout = () => {
 
     if (isNaN(phoneNumber) || isNaN(pinCode)) {
       setPhoneNumberAndPinValidNotification(true);
+      setTimeout(() => {
+        setPhoneNumberAndPinValidNotification(false);
+      }, 2000);
+
+      if (isNaN(phoneNumber) && isNaN(pinCode)) {
+        setPhoneNumber("");
+        setPinCode("");
+      } else if (isNaN(phoneNumber)) {
+        setPhoneNumber("");
+      } else {
+        setPinCode("");
+      }
+
       return;
     } else {
       setPhoneNumberAndPinValidNotification(false);
@@ -47,13 +69,7 @@ const Checkout = () => {
       city != "" &&
       pinCode != ""
     ) {
-      setTimeout(() => {
-        setSuccessNotification(true);
-        setTimeout(() => {
-            navigate("/");
-        }, 1000);
-      }, 100);
-      setSuccessNotification(false);
+      setShowOtpPopUp(true);
     }
   };
 
@@ -73,11 +89,100 @@ const Checkout = () => {
 
       {successNotification && (
         <div className="successNotification animationNotification absolute top-5">
-          ✅ Success
+          ✅ Congratulation for new car 🎉🎉
         </div>
       )}
 
-      <div className="innerBox mt-4 p-3 w-[1200px] max-w-[1200px] max-h-[600px] h-[600px] flex flex-col gap-5">
+      {invalidOtpNotification && (
+        <div className="wrongOtp animationNotification absolute top-5">
+          Wrong OTP
+        </div>
+      )}
+
+      {showOtpPopUp && (
+        <div className="otp-popup absolute top-[35%] bg-zinc-900 rounded-2xl border-2 border-yellow-500 p-4 w-[400px] flex flex-col gap-12 items-center h-[300px]">
+          <div
+            onClick={(e) => {
+              setShowOtpPopUp(false);
+            }}
+            className="cancelBtn w-[20px] text-center cursor-pointer absolute top-4 right-7 rounded-3xl"
+          >
+            ✗
+          </div>
+          <div className="texts mt-5 text-center">
+            <h1>Enter OTP</h1>
+            <p className="text-xs">
+              please pay in link sended to your phone number
+            </p>
+          </div>
+          <div className="otp-inputs flex gap-6">
+            <input
+              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
+              placeholder="______"
+              type="text"
+              value={otp1}
+              onChange={(e) => {
+                setOtp1(e.target.value);
+              }}
+            />
+            <input
+              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
+              placeholder="______"
+              type="text"
+              value={otp2}
+              onChange={(e) => {
+                setOtp2(e.target.value);
+              }}
+            />
+            <input
+              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
+              placeholder="______"
+              type="text"
+              value={otp3}
+              onChange={(e) => {
+                setOtp3(e.target.value);
+              }}
+            />
+            <input
+              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
+              placeholder="______"
+              type="text"
+              value={otp4}
+              onChange={(e) => {
+                setOtp4(e.target.value);
+              }}
+            />
+          </div>
+          <div
+            onClick={() => {
+              if (
+                otp1 === "1" &&
+                otp2 === "2" &&
+                otp3 === "3" &&
+                otp4 === "4"
+              ) {
+                setSuccessNotification(true);
+
+                setTimeout(() => {
+                  setShowOtpPopUp(false);
+                  setSuccessNotification(false);
+                  navigate("/");
+                }, 1000);
+              } else {
+                setInvalidOtpNotification(true);
+                setTimeout(() => {
+                  setInvalidOtpNotification(false);
+                }, 2000);
+              }
+            }}
+            className="confirmButton bg-yellow-600 text-black p-3 rounded-xl hover:bg-yellow-500 transition"
+          >
+            <h1 className="">Confirm</h1>
+          </div>
+        </div>
+      )}
+
+      <div className="innerBox mt-0 p-3 w-[1200px] max-w-[1200px] max-h-[600px] h-[600px] flex flex-col gap-5">
         {/* Back Button */}
         <nav className="heading cursor-pointer w-fit mt-3">
           <div
@@ -199,7 +304,9 @@ const Checkout = () => {
               <span>Remaining</span>
               <span>price</span>
             </div>
-            <p>CARDS,UPI,NET BANKING</p>
+            <p className="text-xs">
+              You have to pay remaining amount after shipping
+            </p>
             <button
               onClick={(e) => {
                 formHandler(e);
