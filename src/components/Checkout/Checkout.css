@@ -1,35 +1,40 @@
-.formNotFilledNotification{
+.formNotFilledNotification {
     background-color: rgba(255, 0, 0, 0.608);
     padding: 10px;
     border-radius: 10px;
 }
 
-.phoneAndPinNotValidNotification{
+.phoneAndPinNotValidNotification {
     background-color: rgba(255, 251, 0, 0.589);
     padding: 10px;
     border-radius: 10px;
 }
-.successNotification{
+
+.successNotification {
     background-color: rgba(9, 255, 0, 0.589);
     padding: 10px;
     border-radius: 10px;
 }
-.wrongOtp{
+
+.wrongOtp {
     background-color: rgba(255, 0, 0, 0.608);
     padding: 10px;
     border-radius: 10px;
 }
 
-.animationNotification{
+.animationNotification {
     animation: notification 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.cancelBtn{
+
+.cancelBtn {
     background-color: red;
     box-shadow: 0 0 10px red;
 }
 
 @keyframes notification {
-    0%{
+    0% {
         top: -10px;
     }
 }
+
+

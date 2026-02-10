@@ -17,6 +17,8 @@ const Checkout = () => {
   const [successNotification, setSuccessNotification] = useState(false);
   const [showOtpPopUp, setShowOtpPopUp] = useState(false);
   const [invalidOtpNotification, setInvalidOtpNotification] = useState(false);
+  const [showCongratulationAnimation, setShowCongratulationAnimation] =
+    useState(false);
   const [otp1, setOtp1] = useState("");
   const [otp2, setOtp2] = useState("");
   const [otp3, setOtp3] = useState("");
@@ -75,6 +77,7 @@ const Checkout = () => {
 
   return (
     <div className="container text-white flex items-center flex-col justify-center">
+      {/* --------------------------------------Animations---------------------------------------- */}
       {inputIsEmptyNotification && (
         <div className="formNotFilledNotification animationNotification absolute top-5">
           ⚠️ please provide all information correctly
@@ -112,7 +115,7 @@ const Checkout = () => {
           <div className="texts mt-5 text-center">
             <h1>Enter OTP</h1>
             <p className="text-xs">
-              please pay in link sended to your phone number
+              payment link sended to your phone,pay and get otp
             </p>
           </div>
           <div className="otp-inputs flex gap-6">
@@ -181,6 +184,8 @@ const Checkout = () => {
           </div>
         </div>
       )}
+
+      {/* --------------------------------------Animations---------------------------------------- */}
 
       <div className="innerBox mt-0 p-3 w-[1200px] max-w-[1200px] max-h-[600px] h-[600px] flex flex-col gap-5">
         {/* Back Button */}
