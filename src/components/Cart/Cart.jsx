@@ -7,15 +7,17 @@ const Cart = () => {
   const { state } = useLocation();
   console.log(state.videoLink);
   const navigate = useNavigate();
-  const [advancePayment, setAdvancePayment] = useState(0)
-  const [price, setPrice] = useState(0)
-
+  const [advancePayment, setAdvancePayment] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [payablePrice, setPayablePrice] = useState(0);
   useEffect(() => {
-    let num = parseFloat(state.price.replace("₹","").replace("cr",""));
-    setPrice("₹" + (num-num*0.3)+" cr");
-    setAdvancePayment("₹"+ num*0.3 +" cr");
-  }, [])
-  
+    let num = parseFloat(state.price.replace("₹", "").replace("cr", ""));
+    setPrice((num));
+    setAdvancePayment(Math.floor((num *0.3)* 100) / 100);
+    setPayablePrice(Math.floor((num-(num*0.3))* 100) / 100);
+    // num-(num*0.3), here this logic is for getting digits upto 2 digits only
+  }, []);
+
   return (
     <div className="container text-white flex items-center flex-col justify-center">
       <div className="innerBox mt-10 p-3 w-[1200px] max-w-[1200px] max-h-[600px] h-[600px] flex flex-col gap-5">
@@ -43,7 +45,13 @@ const Cart = () => {
                 🗑
               </div>
 
-              <video className="max-w-[50%]" autoPlay muted loop src={`http://localhost:4455/videos/${state.videoLink}`}></video>
+              <video
+                className="max-w-[50%]"
+                autoPlay
+                muted
+                loop
+                src={`http://localhost:4455/videos/${state.videoLink}`}
+              ></video>
 
               <div className="info flex flex-col gap-4 justify-center">
                 <h2 className="font-black tracking-widest">{state.carName}</h2>
@@ -63,17 +71,25 @@ const Cart = () => {
 
             <div className="flex justify-between text-zinc-300">
               <span>Advance</span>
-              <span>{advancePayment}</span>
+              <span>₹{advancePayment}cr</span>
             </div>
 
             <hr className="border-zinc-700" />
 
             <div className="flex justify-between text-lg">
               <span>Remaining</span>
-              <span>{price}</span>
+              <span>₹{payablePrice}cr</span>
             </div>
 
-            <button onClick={(e)=>{navigate('/checkout')}} className="bg-yellow-500 text-black p-3 rounded-xl hover:bg-yellow-400 transition">
+            <button
+              onClick={() => navigate("/checkout", { state: {
+                "carPrice":price,
+                "carAdvance":advancePayment,
+                "carBrand":state.carBrand,
+                "payableAmount":payablePrice,
+              } })}
+              className="bg-yellow-500 text-black p-3 rounded-xl hover:bg-yellow-400 transition"
+            >
               Proceed to Checkout
             </button>
           </div>

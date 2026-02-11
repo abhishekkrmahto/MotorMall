@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import "../Checkout/Checkout.css";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import jsPDF from "jspdf";
+import logo from "../../assets/logo-no-bg.png";
+import ceoSign from "../../assets/founder-and-ceo-signature.png";
+import coCeoSign from "../../assets/co-ceo-signature.png";
+import mdSign from "../../assets/managing-director-signature.jpg";
 
 const Checkout = () => {
   const [name, setName] = useState("");
@@ -25,6 +31,8 @@ const Checkout = () => {
   const [otp4, setOtp4] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state;
 
   const formHandler = (e) => {
     e.preventDefault();
@@ -75,6 +83,52 @@ const Checkout = () => {
     }
   };
 
+  const downloadReceipt = () => {
+    const doc = new jsPDF();
+
+    // Logo
+    doc.addImage(logo, "PNG", 80, 10, 50, 25);
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("MotorMall", 105, 45, null, null, "center");
+
+    // Lines
+    doc.line(10, 50, 200, 50);
+    doc.line(10, 55, 200, 55);
+
+    // Customer Details
+    doc.setFontSize(14);
+    doc.text(`Name: ${name}`, 20, 70);
+    doc.text(`Address: ${address}, ${city}, ${pinCode}`, 20, 80);
+    doc.text(`Phone Number: ${phoneNumber}`, 20, 90);
+
+    // Order / Payment Details
+    doc.text(`Order ID: MM25K${state.carBrand}0204`, 20, 105);
+    doc.text(`Car Original Price: INR${state.carPrice}cr`, 20, 115);
+    doc.text(`Car Advance Payment: INR${state.carAdvance}cr`, 20, 125);
+    doc.text(`Car Remaining Amount: INR${state.payableAmount}cr`, 20, 135);
+    doc.text(`Payment Method: NET BANKING`, 20, 145);
+
+    // Divider
+    doc.line(20, 150, 190, 150);
+
+    // Signatures (right side)
+    doc.setFontSize(10);
+
+    doc.text("CHIEF EXECUTIVE OFFICER", 140, 165);
+    doc.addImage(ceoSign, "PNG", 140, 170, 40, 15);
+
+    doc.text("CO-CHIEF EXECUTIVE OFFICER", 140, 195);
+    doc.addImage(coCeoSign, "PNG", 140, 200, 40, 15);
+
+    doc.text("MANAGING DIRECTOR", 140, 225);
+    doc.addImage(mdSign, "PNG", 140, 230, 40, 15);
+
+    // Save
+    doc.save("MotorMall Receipt.pdf");
+  };
+
   return (
     <div className="container text-white flex items-center flex-col justify-center">
       {/* --------------------------------------Animations---------------------------------------- */}
@@ -91,9 +145,15 @@ const Checkout = () => {
       )}
 
       {successNotification && (
+       <>
         <div className="successNotification animationNotification absolute top-5">
           ✅ Congratulation for new car 🎉🎉
         </div>
+         <div className="successNotification animationNotification absolute top-20">
+          ⬇️ Reciept Downloading... 
+        </div>
+       </>
+        
       )}
 
       {invalidOtpNotification && (
@@ -169,6 +229,7 @@ const Checkout = () => {
                 setTimeout(() => {
                   setShowOtpPopUp(false);
                   setSuccessNotification(false);
+                  downloadReceipt();
                   navigate("/");
                 }, 1000);
               } else {
@@ -295,19 +356,19 @@ const Checkout = () => {
 
             <div className="flex justify-between text-zinc-300">
               <span>Subtotal</span>
-              <span>price</span>
+              <span>₹{state.carPrice}cr</span>
             </div>
 
             <div className="flex justify-between text-zinc-300">
               <span>Advance</span>
-              <span>advance</span>
+              <span>₹{state.carAdvance}cr</span>
             </div>
 
             <hr className="border-zinc-700" />
 
             <div className="flex justify-between text-lg">
               <span>Remaining</span>
-              <span>price</span>
+              <span>₹{state.payableAmount}cr</span>
             </div>
             <p className="text-xs">
               You have to pay remaining amount after shipping
