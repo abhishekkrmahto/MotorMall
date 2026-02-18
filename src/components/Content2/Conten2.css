@@ -1,3 +1,13 @@
 .hideScrollBar::-webkit-scrollbar{
     display: none;
 }
+@media (max-width: 768px) {
+  .carCardsContainer {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .topTexts hr {
+    width: 90%;
+  }
+}

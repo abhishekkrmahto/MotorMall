@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import "../Checkout/Checkout.css";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import logo from "../../assets/logo-no-bg.png";
 import ceoSign from "../../assets/founder-and-ceo-signature.png";
 import coCeoSign from "../../assets/co-ceo-signature.png";
 import mdSign from "../../assets/managing-director-signature.jpg";
+import "../Checkout/Checkout.css"; // Apni CSS file check kar lein animations ke liye
 
 const Checkout = () => {
   const [name, setName] = useState("");
@@ -14,6 +14,8 @@ const Checkout = () => {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [pinCode, setPinCode] = useState("");
+
+  // Wahi pehle wali notification states
   const [inputIsEmptyNotification, setInputIsEmptyNotification] =
     useState(false);
   const [
@@ -21,14 +23,10 @@ const Checkout = () => {
     setPhoneNumberAndPinValidNotification,
   ] = useState(false);
   const [successNotification, setSuccessNotification] = useState(false);
-  const [showOtpPopUp, setShowOtpPopUp] = useState(false);
   const [invalidOtpNotification, setInvalidOtpNotification] = useState(false);
-  const [showCongratulationAnimation, setShowCongratulationAnimation] =
-    useState(false);
-  const [otp1, setOtp1] = useState("");
-  const [otp2, setOtp2] = useState("");
-  const [otp3, setOtp3] = useState("");
-  const [otp4, setOtp4] = useState("");
+
+  const [showOtpPopUp, setShowOtpPopUp] = useState(false);
+  const [otp, setOtp] = useState({ 1: "", 2: "", 3: "", 4: "" });
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,351 +34,280 @@ const Checkout = () => {
 
   const formHandler = (e) => {
     e.preventDefault();
-    if (
-      name === "" ||
-      phoneNumber === "" ||
-      address === "" ||
-      city === "" ||
-      pinCode === ""
-    ) {
+    if (!name || !phoneNumber || !address || !city || !pinCode) {
       setInputIsEmptyNotification(true);
-      setTimeout(() => {
-        setInputIsEmptyNotification(false);
-      }, 2000);
+      setTimeout(() => setInputIsEmptyNotification(false), 2000);
       return;
-    } else {
-      setInputIsEmptyNotification(false);
     }
-
     if (isNaN(phoneNumber) || isNaN(pinCode)) {
       setPhoneNumberAndPinValidNotification(true);
-      setTimeout(() => {
-        setPhoneNumberAndPinValidNotification(false);
-      }, 2000);
-
-      if (isNaN(phoneNumber) && isNaN(pinCode)) {
-        setPhoneNumber("");
-        setPinCode("");
-      } else if (isNaN(phoneNumber)) {
-        setPhoneNumber("");
-      } else {
-        setPinCode("");
-      }
-
+      setTimeout(() => setPhoneNumberAndPinValidNotification(false), 2000);
       return;
-    } else {
-      setPhoneNumberAndPinValidNotification(false);
     }
-
-    if (
-      name != "" &&
-      phoneNumber != "" &&
-      address != "" &&
-      city != "" &&
-      pinCode != ""
-    ) {
-      setShowOtpPopUp(true);
-    }
+    setShowOtpPopUp(true);
   };
 
   const downloadReceipt = () => {
     const doc = new jsPDF();
+    const remaining = Number(state.payableAmount) * 10000000;
+    const singleEmi = Math.round(remaining / 30);
+    let emiRows = Array.from({ length: 30 }, (_, i) => [
+      `EMI ${i + 1}`,
+      `${singleEmi}`,
+    ]);
 
-    // Logo
-    doc.addImage(logo, "PNG", 80, 10, 50, 25);
+    // Header & Logo
+    doc.addImage(logo, "PNG", 80, 10, 40, 20);
+    doc
+      .setFontSize(18)
+      .text("MOTORMALL OFFICIAL INVOICE", 105, 40, null, null, "center");
+    doc.line(10, 45, 200, 45);
 
-    // Title
-    doc.setFontSize(18);
-    doc.text("MotorMall", 105, 45, null, null, "center");
+    // Customer Info
+    doc.setFontSize(11).text(`Customer: ${name}`, 14, 55);
+    doc.text(`Contact: ${phoneNumber}`, 14, 62);
+    doc.text(`Delivery: ${address}, ${city} - ${pinCode}`, 14, 69);
+    doc.text(`Asset: ${state.carName} (MM25K${state.carBrand})`, 14, 80);
+    doc.text(`Advance Paid: ${state.carAdvance} Cr`, 14, 87);
 
-    // Lines
-    doc.line(10, 50, 200, 50);
-    doc.line(10, 55, 200, 55);
+    // EMI Table
+    autoTable(doc, {
+      startY: 95,
+      head: [["Installment", "Amount (INR)"]],
+      body: emiRows,
+      theme: "striped",
+    });
 
-    // Customer Details
-    doc.setFontSize(14);
-    doc.text(`Name: ${name}`, 20, 70);
-    doc.text(`Address: ${address}, ${city}, ${pinCode}`, 20, 80);
-    doc.text(`Phone Number: ${phoneNumber}`, 20, 90);
+    // Signatures Section (3 Signs in a Row)
+    const finalY = doc.lastAutoTable.finalY + 20;
+    doc.setFontSize(9);
 
-    // Order / Payment Details
-    doc.text(`Order ID: MM25K${state.carBrand}0204`, 20, 105);
-    doc.text(`Car Original Price: INR${state.carPrice}cr`, 20, 115);
-    doc.text(`Car Advance Payment: INR${state.carAdvance}cr`, 20, 125);
-    doc.text(`Car Remaining Amount: INR${state.payableAmount}cr`, 20, 135);
-    doc.text(`Payment Method: NET BANKING`, 20, 145);
+    // 1. CEO (Left)
+    doc.addImage(ceoSign, "PNG", 20, finalY, 30, 10);
+    doc.text("Founder & CEO", 20, finalY + 15);
 
-    // Divider
-    doc.line(20, 150, 190, 150);
+    // 2. Co-CEO (Center)
+    doc.addImage(coCeoSign, "PNG", 85, finalY, 30, 10);
+    doc.text("Co-CEO", 85, finalY + 15);
 
-    // Signatures (right side)
-    doc.setFontSize(10);
+    // 3. Managing Director (Right)
+    doc.addImage(mdSign, "PNG", 150, finalY, 30, 10);
+    doc.text("Managing Director", 150, finalY + 15);
 
-    doc.text("CHIEF EXECUTIVE OFFICER", 140, 165);
-    doc.addImage(ceoSign, "PNG", 140, 170, 40, 15);
-
-    doc.text("CO-CHIEF EXECUTIVE OFFICER", 140, 195);
-    doc.addImage(coCeoSign, "PNG", 140, 200, 40, 15);
-
-    doc.text("MANAGING DIRECTOR", 140, 225);
-    doc.addImage(mdSign, "PNG", 140, 230, 40, 15);
-
-    // Save
-    doc.save("MotorMall Receipt.pdf");
+    doc.save(`${name}_MotorMall_Receipt.pdf`);
   };
 
+  const handleOtpConfirm = () => {
+    if (otp[1] === "1" && otp[2] === "2" && otp[3] === "3" && otp[4] === "4") {
+      setSuccessNotification(true);
+      setTimeout(() => {
+        setSuccessNotification(false);
+        setShowOtpPopUp(false);
+        downloadReceipt();
+        navigate("/");
+      }, 2000);
+    } else {
+      setInvalidOtpNotification(true);
+      setTimeout(() => setInvalidOtpNotification(false), 2000);
+    }
+  };
+
+  if (!state)
+    return (
+      <div className="h-screen flex items-center justify-center text-white">
+        No State Found
+      </div>
+    );
+
   return (
-    <div className="container text-white flex items-center flex-col justify-center">
-      {/* --------------------------------------Animations---------------------------------------- */}
+    <div className="min-h-screen bg-black text-white p-4 md:p-10 flex flex-col items-center justify-center relative">
+      {/* ----------------- Notifications (Original Style) ----------------- */}
       {inputIsEmptyNotification && (
-        <div className="formNotFilledNotification animationNotification absolute top-5">
+        <div className="formNotFilledNotification animationNotification absolute top-5 bg-red-600 px-6 py-2 rounded-full z-[100]">
           ⚠️ please provide all information correctly
         </div>
       )}
 
       {phoneNumberAndPinValidNotification && (
-        <div className="phoneAndPinNotValidNotification animationNotification absolute top-5">
+        <div className="phoneAndPinNotValidNotification animationNotification absolute top-5 bg-orange-600 px-6 py-2 rounded-full z-[100]">
           ⚠️ phone number and pin should be number
         </div>
       )}
 
       {successNotification && (
-       <>
-        <div className="successNotification animationNotification absolute top-5">
-          ✅ Congratulation for new car 🎉🎉
+        <div className="flex flex-col items-center absolute top-5 z-[100] gap-2">
+          <div className="successNotification animationNotification bg-green-600 px-6 py-2 rounded-full">
+            ✅ Congratulation for new car 🎉🎉
+          </div>
+          <div className="successNotification animationNotification bg-blue-600 px-6 py-2 rounded-full text-xs">
+            ⬇️ Receipt Downloading...
+          </div>
         </div>
-         <div className="successNotification animationNotification absolute top-20">
-          ⬇️ Reciept Downloading... 
-        </div>
-       </>
-        
       )}
 
       {invalidOtpNotification && (
-        <div className="wrongOtp animationNotification absolute top-5">
+        <div className="wrongOtp animationNotification absolute top-5 bg-red-500 px-8 py-2 rounded-full z-[100]">
           Wrong OTP
         </div>
       )}
 
+      {/* OTP POPUP */}
       {showOtpPopUp && (
-        <div className="otp-popup absolute top-[35%] bg-zinc-900 rounded-2xl border-2 border-yellow-500 p-4 w-[400px] flex flex-col gap-12 items-center h-[300px]">
-          <div
-            onClick={(e) => {
-              setShowOtpPopUp(false);
-            }}
-            className="cancelBtn w-[20px] text-center cursor-pointer absolute top-4 right-7 rounded-3xl"
-          >
-            ✗
-          </div>
-          <div className="texts mt-5 text-center">
-            <h1>Enter OTP</h1>
-            <p className="text-xs">
-              payment link sended to your phone,pay and get otp
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-yellow-500/30 p-8 rounded-[2.5rem] w-full max-w-[400px] text-center shadow-[0_0_50px_rgba(234,179,8,0.1)]">
+            <h2 className="text-2xl font-black text-yellow-500 mb-2 italic tracking-tighter">
+              VERIFY
+            </h2>
+            <p className="text-zinc-500 text-[10px] mb-8 uppercase tracking-widest">
+              Code sent to {phoneNumber}
             </p>
-          </div>
-          <div className="otp-inputs flex gap-6">
-            <input
-              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
-              placeholder="______"
-              type="text"
-              value={otp1}
-              onChange={(e) => {
-                setOtp1(e.target.value);
-              }}
-            />
-            <input
-              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
-              placeholder="______"
-              type="text"
-              value={otp2}
-              onChange={(e) => {
-                setOtp2(e.target.value);
-              }}
-            />
-            <input
-              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
-              placeholder="______"
-              type="text"
-              value={otp3}
-              onChange={(e) => {
-                setOtp3(e.target.value);
-              }}
-            />
-            <input
-              className="border w-[60px] h-[50px] outline-0 border-2 rounded-xl text-white text-center font-bold text-xl"
-              placeholder="______"
-              type="text"
-              value={otp4}
-              onChange={(e) => {
-                setOtp4(e.target.value);
-              }}
-            />
-          </div>
-          <div
-            onClick={() => {
-              if (
-                otp1 === "1" &&
-                otp2 === "2" &&
-                otp3 === "3" &&
-                otp4 === "4"
-              ) {
-                setSuccessNotification(true);
-
-                setTimeout(() => {
-                  setShowOtpPopUp(false);
-                  setSuccessNotification(false);
-                  downloadReceipt();
-                  navigate("/");
-                }, 1000);
-              } else {
-                setInvalidOtpNotification(true);
-                setTimeout(() => {
-                  setInvalidOtpNotification(false);
-                }, 2000);
-              }
-            }}
-            className="confirmButton bg-yellow-600 text-black p-3 rounded-xl hover:bg-yellow-500 transition"
-          >
-            <h1 className="">Confirm</h1>
+            <div className="flex gap-4 justify-center mb-10">
+              {[1, 2, 3, 4].map((i) => (
+                <input
+                  key={i}
+                  maxLength="1"
+                  className="w-12 h-14 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-center text-xl font-bold focus:border-yellow-500 outline-none transition-all"
+                  onChange={(e) => setOtp({ ...otp, [i]: e.target.value })}
+                />
+              ))}
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowOtpPopUp(false)}
+                className="flex-1 py-3 text-zinc-500 font-bold text-xs uppercase"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleOtpConfirm}
+                className="flex-1 bg-yellow-500 text-black rounded-xl font-black py-3 text-xs uppercase hover:bg-yellow-400 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* --------------------------------------Animations---------------------------------------- */}
+      {/* MAIN CONTENT */}
+      <div className="w-full max-w-[1200px] flex flex-col gap-6">
+        <button
+          onClick={() => navigate("/")}
+          className="text-zinc-500 text-[10px] tracking-widest uppercase hover:text-white transition w-fit"
+        >
+          ← Abort Checkout
+        </button>
 
-      <div className="innerBox mt-0 p-3 w-[1200px] max-w-[1200px] max-h-[600px] h-[600px] flex flex-col gap-5">
-        {/* Back Button */}
-        <nav className="heading cursor-pointer w-fit mt-3">
-          <div
-            onClick={(e) => {
-              navigate("/");
-            }}
-            className="backBtn text-s text-zinc-300"
-          >
-            🔙 Back to Home
-          </div>
-        </nav>
-
-        {/* Main Cart Area */}
-        <h1 className="text-2xl ml-5">Checkout</h1>
-        <div className="infoBox flex justify-between gap-6 ml-3 h-[600px] rounded-2xl p-4">
-          <div className="address-details w-[60%] bg-zinc-900 rounded-xl p-6 flex flex-col gap-6 h-fit mt-1">
-            <h1 className="justify-self-center text-center text-xl">
-              Shipping details
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* LEFT: FORM BOX */}
+          <div className="w-full lg:w-[60%] bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] p-6 md:p-10 shadow-xl">
+            <h1 className="text-xl font-black mb-8 italic text-yellow-500 uppercase tracking-widest">
+              Delivery Details
             </h1>
-            <hr className="h-[5px] border-0 bg-yellow-500" />
-            <form action="">
-              <div className="inputs flex flex-col justify-center items-center">
-                <fieldset className="p-3 w-[80%]">
-                  <legend className="text-l">Name</legend>
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold ml-2">
+                    Full Name
+                  </label>
                   <input
                     value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                    }}
-                    className="border p-2 w-[80%] rounded-xl outline-0 border-zinc-500"
-                    type="text"
-                    placeholder="eg: Abhishek Kumar"
-                    name=""
-                    id=""
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
+                    placeholder="Abhishek Kumar"
                   />
-                </fieldset>
-
-                <fieldset className="p-3 w-[80%]">
-                  <legend className="text-l">Phone Number</legend>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold ml-2">
+                    Secure Contact
+                  </label>
                   <input
                     value={phoneNumber}
-                    onChange={(e) => {
-                      setPhoneNumber(e.target.value);
-                    }}
-                    className="border p-2 w-[80%] rounded-xl outline-0 border-zinc-500"
-                    type="text"
-                    placeholder="eg: 81023XXXXX"
-                    name=""
-                    id=""
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
+                    placeholder="81023XXXXX"
                   />
-                </fieldset>
-
-                <fieldset className="p-3 w-[80%]">
-                  <legend className="text-l">Address</legend>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold ml-2">
+                  Residency Address
+                </label>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
+                  placeholder="Street, Locality, Landmark"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold ml-2">
+                    City
+                  </label>
                   <input
-                    value={address}
-                    onChange={(e) => {
-                      setAddress(e.target.value);
-                    }}
-                    className="border p-2 w-[80%] rounded-xl outline-0 border-zinc-500"
-                    type="text"
-                    placeholder="eg: Ranchi MotorMall"
-                    name=""
-                    id=""
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
+                    placeholder="Ranchi"
                   />
-                </fieldset>
-
-                <div className="input-city-pinCode flex justify-between w-[80%]">
-                  <fieldset className="p-3">
-                    <legend className="text-l">City</legend>
-                    <input
-                      value={city}
-                      onChange={(e) => {
-                        setCity(e.target.value);
-                      }}
-                      className="border p-2 w-[50%] rounded-xl outline-0 border-zinc-500"
-                      type="text"
-                      placeholder="eg: Lalpur"
-                      name=""
-                      id=""
-                    />
-                  </fieldset>
-                  <fieldset className="p-3">
-                    <legend className="text-l">Pin Code</legend>
-                    <input
-                      value={pinCode}
-                      onChange={(e) => {
-                        setPinCode(e.target.value);
-                      }}
-                      className="border p-2 w-[50%] rounded-xl outline-0 border-zinc-500"
-                      type="text"
-                      placeholder="eg: 812XXX"
-                      name=""
-                      id=""
-                    />
-                  </fieldset>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold ml-2">
+                    Zip Code
+                  </label>
+                  <input
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                    className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
+                    placeholder="812XXX"
+                  />
                 </div>
               </div>
             </form>
-            <hr className="h-[5px] border-0 bg-yellow-500" />
           </div>
 
-          <div className="amount-details w-[40%] bg-zinc-900 rounded-xl p-6 flex flex-col gap-6 h-fit mt-18">
-            <h2 className="text-xl">Checkout</h2>
+          {/* RIGHT: SUMMARY BOX */}
+          <div className="w-full lg:w-[40%]">
+            <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2.5rem] shadow-2xl">
+              <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-8">
+                Financial Summary
+              </h2>
+              <div className="space-y-4 mb-8 px-2">
+                <div className="flex justify-between text-zinc-400 text-xs italic">
+                  <span>Asset Value</span>
+                  <span className="text-white font-bold">
+                    {state.carPrice} Cr
+                  </span>
+                </div>
+                <div className="flex justify-between text-zinc-400 text-xs italic border-b border-zinc-800 pb-4">
+                  <span>Reservation Fee</span>
+                  <span className="text-white font-bold">
+                    {state.carAdvance} Cr
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-sm font-black uppercase tracking-tighter">
+                    Payable Later
+                  </span>
+                  <span className="text-2xl font-black text-yellow-500 tracking-tighter italic">
+                    ₹{state.payableAmount}cr
+                  </span>
+                </div>
+              </div>
 
-            <div className="flex justify-between text-zinc-300">
-              <span>Subtotal</span>
-              <span>₹{state.carPrice}cr</span>
+              {/* CHHOTA BUTTON: Padding aur font size kam kiya gaya hai */}
+              <button
+                onClick={formHandler}
+                className="w-full bg-yellow-500 text-black py-4 rounded-xl font-black uppercase text-xs tracking-[0.1em] shadow-lg hover:bg-yellow-400 transition-all active:scale-95"
+              >
+                Complete Reservation
+              </button>
+
+              <p className="text-[8px] text-center text-zinc-600 mt-6 uppercase font-bold tracking-widest">
+                Secure Encryption • Private Transaction
+              </p>
             </div>
-
-            <div className="flex justify-between text-zinc-300">
-              <span>Advance</span>
-              <span>₹{state.carAdvance}cr</span>
-            </div>
-
-            <hr className="border-zinc-700" />
-
-            <div className="flex justify-between text-lg">
-              <span>Remaining</span>
-              <span>₹{state.payableAmount}cr</span>
-            </div>
-            <p className="text-xs">
-              You have to pay remaining amount after shipping
-            </p>
-            <button
-              onClick={(e) => {
-                formHandler(e);
-              }}
-              className="bg-yellow-500 text-black p-3 rounded-xl hover:bg-yellow-400 transition"
-            >
-              Pay
-            </button>
           </div>
         </div>
       </div>

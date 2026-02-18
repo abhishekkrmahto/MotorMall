@@ -24,3 +24,11 @@
 .hideScrollBar::-webkit-scrollbar{
     display: none;
 }
+
+
+@media (max-width: 768px) {
+  .logoAnimation img {
+    width: 300px !important;
+    left: -500px !important;
+  }
+}

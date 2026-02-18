@@ -11,3 +11,24 @@
     box-shadow: 0 0 5px rgba(255, 60, 0, 0.992);
     cursor: pointer;
 }
+
+@media (max-width: 768px) {
+
+  .innerBox {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .infoBox {
+    flex-direction: column;
+  }
+
+  .info-left,
+  .info-right {
+    width: 100% !important;
+  }
+
+  video {
+    max-width: 100% !important;
+  }
+}

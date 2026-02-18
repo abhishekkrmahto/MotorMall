@@ -34,7 +34,7 @@ useEffect(() => {
 
 
   return (
-    <div className="hideScrollBar max-w-fit h-max-fit">
+    <div className="hideScrollBar w-full overflow-x-hidden text-white">
       <NavBar></NavBar>
       <div className="logoAnimation">
         <img className={`invert-100 w-[600px] absolute top-18 left-[-1000px] ${animationSetter}`} src={logoNoBg} alt="" />

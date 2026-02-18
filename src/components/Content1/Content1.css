@@ -5,3 +5,28 @@
 .searchBarAnimation{
     animation: barAnimation 1.2s ease-in-out alternate-reverse infinite;
 }
+@media (max-width: 768px) {
+  .pageInfo h1 {
+    font-size: 28px;
+  }
+
+  .yellowBox {
+    width: 90% !important;
+    margin: auto;
+  }
+
+  .searchBar-input {
+    width: 90% !important;
+  }
+
+  .searchBar button {
+    margin-top: 10px;
+    width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageInfo h1 {
+    font-size: 22px;
+  }
+}

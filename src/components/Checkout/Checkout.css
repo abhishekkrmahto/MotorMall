@@ -38,3 +38,31 @@
 }
 
 
+@media (max-width: 768px) {
+
+  .innerBox {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .infoBox {
+    flex-direction: column;
+  }
+
+  .address-details,
+  .amount-details {
+    width: 100% !important;
+  }
+
+  fieldset input {
+    width: 100% !important;
+  }
+
+  .input-city-pinCode {
+    flex-direction: column;
+  }
+
+  .otp-popup {
+    width: 90% !important;
+  }
+}
