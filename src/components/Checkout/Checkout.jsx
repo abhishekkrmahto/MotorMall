@@ -29,20 +29,33 @@ const Checkout = () => {
   const [invalidOtpNotification, setInvalidOtpNotification] = useState(false);
 
   const [showOtpPopUp, setShowOtpPopUp] = useState(false);
-  const [otp, setOtp] = useState({ 1: "", 2: "", 3: "", 4: "" });
+  const [otp, setOtp] = useState({
+    1: "",
+    2: "",
+    3: "",
+    4: "",
+    5: "",
+    6: "",
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state;
 
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        "recaptcha-container",
-        { size: "invisible" },
-        auth,
-      );
+  const setupRecaptcha = async () => {
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
     }
+
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+      },
+    );
+
+    await window.recaptchaVerifier.render();
   };
 
   const formHandler = async (e) => {
@@ -61,7 +74,7 @@ const Checkout = () => {
     }
 
     try {
-      setupRecaptcha();
+      await setupRecaptcha();
       const appVerifier = window.recaptchaVerifier;
 
       const result = await signInWithPhoneNumber(
@@ -131,7 +144,13 @@ const Checkout = () => {
   const handleOtpConfirm = async () => {
     if (!confirmationResult) return;
 
-    const enteredOtp = otp[1] + otp[2] + otp[3] + otp[4];
+    const enteredOtp = otp[1] + otp[2] + otp[3] + otp[4] + otp[5] + otp[6];
+
+    if (enteredOtp.length !== 6) {
+      setInvalidOtpNotification(true);
+      setTimeout(() => setInvalidOtpNotification(false), 2000);
+      return;
+    }
 
     try {
       await confirmationResult.confirm(enteredOtp);
@@ -159,7 +178,7 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-10 flex flex-col items-center justify-center relative">
-      {/* ----------------- Notifications (Original Style) ----------------- */}
+      {/* ----------------- Notifications----------------- */}
       {inputIsEmptyNotification && (
         <div className="formNotFilledNotification animationNotification absolute top-5 bg-red-600 px-6 py-2 rounded-full z-[100]">
           ⚠️ please provide all information correctly
@@ -200,12 +219,22 @@ const Checkout = () => {
               Code sent to {phoneNumber}
             </p>
             <div className="flex gap-4 justify-center mb-10">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <input
                   key={i}
+                  id={`otp-${i}`}
                   maxLength="1"
+                  value={otp[i]}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/, "");
+                    setOtp({ ...otp, [i]: value });
+
+                    if (value && i < 6) {
+                      const next = document.getElementById(`otp-${i + 1}`);
+                      if (next) next.focus();
+                    }
+                  }}
                   className="w-12 h-14 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-center text-xl font-bold focus:border-yellow-500 outline-none transition-all"
-                  onChange={(e) => setOtp({ ...otp, [i]: e.target.value })}
                 />
               ))}
             </div>
@@ -260,8 +289,12 @@ const Checkout = () => {
                     Secure Contact
                   </label>
                   <input
+                    type="tel"
+                    maxLength="10"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) =>
+                      setPhoneNumber(e.target.value.replace(/\D/, ""))
+                    }
                     className="bg-zinc-800/50 border border-zinc-700 p-3.5 rounded-xl outline-none focus:border-yellow-500/50 transition-all text-sm"
                     placeholder="81023XXXXX"
                   />
