@@ -7,6 +7,8 @@ import ceoSign from "../../assets/founder-and-ceo-signature.png";
 import coCeoSign from "../../assets/co-ceo-signature.png";
 import mdSign from "../../assets/managing-director-signature.jpg";
 import "../Checkout/Checkout.css"; // Apni CSS file check kar lein animations ke liye
+import { auth } from "../../firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const Checkout = () => {
   const [name, setName] = useState("");
@@ -14,6 +16,7 @@ const Checkout = () => {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [pinCode, setPinCode] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
 
   // Wahi pehle wali notification states
   const [inputIsEmptyNotification, setInputIsEmptyNotification] =
@@ -32,19 +35,47 @@ const Checkout = () => {
   const location = useLocation();
   const state = location.state;
 
-  const formHandler = (e) => {
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        "recaptcha-container",
+        { size: "invisible" },
+        auth,
+      );
+    }
+  };
+
+  const formHandler = async (e) => {
     e.preventDefault();
+
     if (!name || !phoneNumber || !address || !city || !pinCode) {
       setInputIsEmptyNotification(true);
       setTimeout(() => setInputIsEmptyNotification(false), 2000);
       return;
     }
+
     if (isNaN(phoneNumber) || isNaN(pinCode)) {
       setPhoneNumberAndPinValidNotification(true);
       setTimeout(() => setPhoneNumberAndPinValidNotification(false), 2000);
       return;
     }
-    setShowOtpPopUp(true);
+
+    try {
+      setupRecaptcha();
+      const appVerifier = window.recaptchaVerifier;
+
+      const result = await signInWithPhoneNumber(
+        auth,
+        "+91" + phoneNumber,
+        appVerifier,
+      );
+
+      setConfirmationResult(result);
+      setShowOtpPopUp(true);
+    } catch (error) {
+      console.log(error);
+      alert("OTP send failed");
+    }
   };
 
   const downloadReceipt = () => {
@@ -97,16 +128,23 @@ const Checkout = () => {
     doc.save(`${name}_MotorMall_Receipt.pdf`);
   };
 
-  const handleOtpConfirm = () => {
-    if (otp[1] === "1" && otp[2] === "2" && otp[3] === "3" && otp[4] === "4") {
+  const handleOtpConfirm = async () => {
+    if (!confirmationResult) return;
+
+    const enteredOtp = otp[1] + otp[2] + otp[3] + otp[4];
+
+    try {
+      await confirmationResult.confirm(enteredOtp);
+
       setSuccessNotification(true);
+
       setTimeout(() => {
         setSuccessNotification(false);
         setShowOtpPopUp(false);
         downloadReceipt();
         navigate("/");
       }, 2000);
-    } else {
+    } catch (error) {
       setInvalidOtpNotification(true);
       setTimeout(() => setInvalidOtpNotification(false), 2000);
     }
@@ -311,6 +349,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      <div id="recaptcha-container"></div>
     </div>
   );
 };
